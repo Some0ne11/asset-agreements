@@ -33,97 +33,103 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 px-2">
             Agreement Generator
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4 leading-relaxed">
             Generate professional asset agreements with digital signatures. 
             Upload CSV data or enter information manually.
           </p>
         </div>
 
         {viewMode === 'input' ? (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Input Mode Toggle */}
-            <div className="flex justify-center">
-              <div className="bg-white rounded-lg p-2 shadow-md">
+            <div className="flex justify-center px-4">
+              <div className="bg-white rounded-lg p-1 sm:p-2 shadow-md w-full max-w-md sm:w-auto">
                 <div className="flex">
                   <button
                     onClick={() => setInputMode('file')}
-                    className={`flex items-center px-6 py-3 rounded-lg transition-colors ${
+                    className={`flex items-center justify-center flex-1 sm:flex-none sm:px-6 px-4 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base ${
                       inputMode === 'file'
                         ? 'bg-blue-600 text-white'
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
-                    <FileUp className="h-5 w-5 mr-2" />
-                    Upload File
+                    <FileUp className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                    <span className="truncate">Upload File</span>
                   </button>
                   <button
                     onClick={() => setInputMode('manual')}
-                    className={`flex items-center px-6 py-3 rounded-lg transition-colors ${
+                    className={`flex items-center justify-center flex-1 sm:flex-none sm:px-6 px-4 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base ${
                       inputMode === 'manual'
                         ? 'bg-blue-600 text-white'
                         : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
-                    <Edit className="h-5 w-5 mr-2" />
-                    Manual Entry
+                    <Edit className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                    <span className="truncate">Manual Entry</span>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Input Component */}
-            {inputMode === 'file' ? (
-              <FileUpload onDataParsed={handleFileDataParsed} />
-            ) : (
-              <ManualInput onDataSubmit={handleManualDataSubmit} />
-            )}
+            <div className="w-full">
+              {inputMode === 'file' ? (
+                <FileUpload onDataParsed={handleFileDataParsed} />
+              ) : (
+                <ManualInput onDataSubmit={handleManualDataSubmit} />
+              )}
+            </div>
           </div>
         ) : (
           currentAgreement && (
-            <AgreementPreview
-              data={currentAgreement}
-              onBack={handleBackToInput}
-            />
+            <div className="w-full">
+              <AgreementPreview
+                data={currentAgreement}
+                onBack={handleBackToInput}
+              />
+            </div>
           )
         )}
 
         {/* Features Section */}
         {viewMode === 'input' && (
-          <div className="mt-16 grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg p-6 shadow-md text-center">
-              <FileUp className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                File Upload
-              </h3>
-              <p className="text-gray-600">
-                Upload CSV files with employee and asset information for bulk processing
-              </p>
-            </div>
+          <div className="mt-12 sm:mt-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+              <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md text-center">
+                <FileUp className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                  File Upload
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  Upload CSV files with employee and asset information for bulk processing
+                </p>
+              </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-md text-center">
-              <Edit className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Manual Entry
-              </h3>
-              <p className="text-gray-600">
-                Enter individual employee and asset details through our intuitive form
-              </p>
-            </div>
+              <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md text-center">
+                <Edit className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                  Manual Entry
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  Enter individual employee and asset details through our intuitive form
+                </p>
+              </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-md text-center">
-              <FileText className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Digital Signature
-              </h3>
-              <p className="text-gray-600">
-                Capture signatures on any device and generate professional PDF agreements
-              </p>
+              <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md text-center sm:col-span-2 lg:col-span-1">
+                <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600 mx-auto mb-3 sm:mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                  Digital Signature
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  Capture signatures on any device and generate professional PDF agreements
+                </p>
+              </div>
             </div>
           </div>
         )}

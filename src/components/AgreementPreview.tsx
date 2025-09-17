@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Download, Edit3, Calendar, Eye } from 'lucide-react';
+import { FileText, Download, Edit3, Calendar, Eye, ArrowLeft, X } from 'lucide-react';
 import type { AgreementData } from '../types';
 import { SignaturePad } from './SignaturePad';
 import { generatePDF } from '../utils/pdfGenerator';
@@ -74,63 +74,63 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
-      <div className="grid lg:grid-cols-2 gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`grid gap-4 sm:gap-6 ${showPreview && previewUrl ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'}`}>
         {/* Agreement Form */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${!showPreview || !previewUrl ? 'max-w-4xl mx-auto' : ''}`}>
           {/* Header */}
-          <div className="bg-blue-600 text-white p-6">
-            <h2 className="text-2xl font-bold flex items-center">
-              <FileText className="h-6 w-6 mr-3" />
-              Asset Agreement
+          <div className="bg-blue-600 text-white p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold flex items-center">
+              <FileText className="h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="break-words">Asset Agreement</span>
             </h2>
-            <p className="text-blue-100 mt-1">Review and sign your agreement</p>
+            <p className="text-blue-100 mt-1 text-sm sm:text-base">Review and sign your agreement</p>
           </div>
 
           {/* Agreement Content */}
-          <div className="p-8 space-y-6">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center text-sm text-gray-600">
-                <Calendar className="h-4 w-4 mr-2" />
-                Date: {currentDate}
+          <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6 lg:mb-8">
+              <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
+                <span className="break-words">Date: {currentDate}</span>
               </div>
             </div>
 
             <div className="prose max-w-none">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                 Asset Assignment Agreement
               </h3>
               
-              <div className="bg-gray-50 p-6 rounded-lg mb-6">
-                <div className="grid md:grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="bg-gray-50 p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="min-w-0">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                       Employee Name
                     </label>
-                    <p className="text-lg font-semibold text-gray-900">{data.name}</p>
+                    <p className="text-base sm:text-lg font-semibold text-gray-900 break-words">{data.name}</p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <div className="min-w-0">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                       Asset Name
                     </label>
-                    <p className="text-lg font-semibold text-gray-900">{data.assetName}</p>
+                    <p className="text-base sm:text-lg font-semibold text-gray-900 break-words">{data.assetName}</p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <div className="min-w-0">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                       Asset ID
                     </label>
-                    <p className="text-lg font-semibold text-gray-900">{data.assetId}</p>
+                    <p className="text-base sm:text-lg font-semibold text-gray-900 break-words">{data.assetId}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4 text-gray-700 leading-relaxed text-sm">
+              <div className="space-y-3 sm:space-y-4 text-gray-700 leading-relaxed text-xs sm:text-sm">
                 <p>
-                  This agreement confirms that <strong>{data.name}</strong> acknowledges 
+                  This agreement confirms that <strong className="break-words">{data.name}</strong> acknowledges 
                   receipt of the following company asset:
                 </p>
                 
-                <p>
+                <p className="break-words">
                   <strong>Asset:</strong> {data.assetName} (ID: {data.assetId})
                 </p>
 
@@ -138,7 +138,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                   By signing this agreement, the employee confirms:
                 </p>
 
-                <ul className="list-disc pl-6 space-y-1 text-sm">
+                <ul className="list-disc pl-4 sm:pl-6 space-y-1 text-xs sm:text-sm">
                   <li>Receipt of the asset in good working condition</li>
                   <li>Responsibility for the care and maintenance of the asset</li>
                   <li>Agreement to return the asset upon termination of employment</li>
@@ -147,43 +147,43 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
               </div>
 
               {/* Signature Section */}
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-medium text-gray-900">Employee Signature</h4>
+              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-3 sm:space-y-0">
+                  <h4 className="text-base sm:text-lg font-medium text-gray-900">Employee Signature</h4>
                   {!signatureData && (
                     <button
                       onClick={() => setShowSignaturePad(true)}
-                      className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex items-center justify-center px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base w-full sm:w-auto"
                     >
-                      <Edit3 className="h-4 w-4 mr-2" />
+                      <Edit3 className="h-4 w-4 mr-2 flex-shrink-0" />
                       Add Signature
                     </button>
                   )}
                 </div>
 
                 {signatureData ? (
-                  <div className="relative">
-                    <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 inline-block">
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                    <div className="border border-gray-300 rounded-lg p-3 sm:p-4 bg-gray-50 w-full sm:w-auto">
                       <img
                         src={signatureData}
                         alt="Signature"
-                        className="max-w-xs h-20 object-contain"
+                        className="w-full sm:max-w-xs h-16 sm:h-20 object-contain"
                       />
                     </div>
                     <button
                       onClick={() => setShowSignaturePad(true)}
-                      className="ml-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start"
                     >
                       Edit Signature
                     </button>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                    <p className="text-gray-500">Click "Add Signature" to sign this agreement</p>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center">
+                    <p className="text-gray-500 text-sm sm:text-base">Click "Add Signature" to sign this agreement</p>
                   </div>
                 )}
 
-                <div className="mt-4 text-sm text-gray-600">
+                <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600">
                   Date: {currentDate}
                 </div>
               </div>
@@ -191,71 +191,75 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="bg-gray-50 p-6 flex justify-between items-center">
-            <button
-              onClick={onBack}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition-colors"
-            >
-              Back
-            </button>
-
-            <div className="flex space-x-3">
+          <div className="bg-gray-50 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
               <button
-                onClick={handlePreviewPDF}
-                disabled={!signatureData || isGenerating}
-                className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={onBack}
+                className="flex items-center justify-center px-4 sm:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition-colors text-sm sm:text-base w-full sm:w-auto order-2 sm:order-1"
               >
-                {isGenerating ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <Eye className="h-4 w-4 mr-2" />
-                )}
-                {isGenerating ? 'Generating...' : 'Preview PDF'}
+                <ArrowLeft className="h-4 w-4 mr-2 flex-shrink-0" />
+                Back
               </button>
 
-              <button
-                onClick={handleDownloadPDF}
-                disabled={!signatureData || isGenerating}
-                className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isGenerating ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                ) : (
-                  <Download className="h-4 w-4 mr-2" />
-                )}
-                {isGenerating ? 'Generating...' : 'Download PDF'}
-              </button>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 order-1 sm:order-2">
+                <button
+                  onClick={handlePreviewPDF}
+                  disabled={!signatureData || isGenerating}
+                  className="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                >
+                  {isGenerating ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <Eye className="h-4 w-4 mr-2 flex-shrink-0" />
+                  )}
+                  {isGenerating ? 'Generating...' : 'Preview PDF'}
+                </button>
+
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={!signatureData || isGenerating}
+                  className="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                >
+                  {isGenerating ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <Download className="h-4 w-4 mr-2 flex-shrink-0" />
+                  )}
+                  {isGenerating ? 'Generating...' : 'Download PDF'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* PDF Preview */}
         {showPreview && previewUrl && (
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="bg-gray-800 text-white p-4">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden xl:sticky xl:top-4">
+            <div className="bg-gray-800 text-white p-3 sm:p-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Eye className="h-5 w-5 mr-2" />
+                <h3 className="text-base sm:text-lg font-semibold flex items-center">
+                  <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
                   PDF Preview
                 </h3>
                 <button
                   onClick={() => setShowPreview(false)}
-                  className="text-gray-300 hover:text-white"
+                  className="text-gray-300 hover:text-white p-1 rounded"
+                  aria-label="Close preview"
                 >
-                  ✕
+                  <X className="h-5 w-5" />
                 </button>
               </div>
             </div>
-            <div className="p-4">
+            <div className="p-3 sm:p-4">
               <iframe
                 src={previewUrl}
-                className="w-full h-96 border border-gray-300 rounded"
+                className="w-full h-64 sm:h-80 lg:h-96 border border-gray-300 rounded"
                 title="PDF Preview"
               />
             </div>
           </div>
         )}
-        </div>
+      </div>
 
       {showSignaturePad && (
         <SignaturePad
