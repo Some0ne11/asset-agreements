@@ -4,6 +4,7 @@ export interface AgreementData {
   assetId: string;
   signature?: string;
   id?: string; // For tracking multiple entries
+  additionalAssets?: string[]; // Array of additional asset names
 }
 
 export interface ParsedRow {
