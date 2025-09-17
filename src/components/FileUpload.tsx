@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Upload, FileText, AlertCircle, Users, Search } from 'lucide-react';
 import Papa from 'papaparse';
 import type { AgreementData, ParsedRow } from '../types';
@@ -50,6 +50,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
                 // Multiple entries, show selection
                 setParsedData(agreementData);
                 setShowSelection(true);
+                
+                // Save parsed entries
+                localStorage.setItem("parsedData", JSON.stringify(agreementData));
               }
               setIsLoading(false);
             },
@@ -108,8 +111,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
   }, [processFile]);
 
   const handleEntrySelect = (selectedData: AgreementData) => {
+
     onDataParsed([selectedData]);
     setShowSelection(false);
+
+    // Save selected agreement
+    localStorage.setItem("currentAgreement", JSON.stringify(selectedData));
+    localStorage.setItem("inputMode", "file");
   };
 
   const handleBackToUpload = () => {
@@ -117,7 +125,27 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
     setParsedData([]);
     setSearchTerm('');
     setError(null);
+
+    // Clear persisted data
+    localStorage.removeItem("currentAgreement");
+    localStorage.removeItem("inputMode");
+    localStorage.removeItem("parsedData");
   };
+
+  useEffect(() => {
+    const savedParsed = localStorage.getItem("parsedData");
+    if (savedParsed) {
+      try {
+        const parsed: AgreementData[] = JSON.parse(savedParsed);
+        if (parsed.length > 1) {
+          setParsedData(parsed);
+          setShowSelection(true);
+        }
+      } catch (err) {
+        console.error("Error restoring parsed CSV data", err);
+      }
+    }
+  }, []);
 
   const filteredData = parsedData.filter(entry => 
     entry.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
