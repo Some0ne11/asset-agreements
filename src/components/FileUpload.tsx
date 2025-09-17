@@ -1,6 +1,7 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { Upload, FileText, AlertCircle, Users, Search } from 'lucide-react';
 import Papa from 'papaparse';
+import { FixedSizeList as List } from 'react-window';
 import type { AgreementData, ParsedRow } from '../types';
 
 interface FileUploadProps {
@@ -153,6 +154,60 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
     entry.assetId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Calculate responsive item height based on screen size
+  const itemHeight = useMemo(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    return isMobile ? 160 : 110; // Optimized height for proper content display
+  }, []);
+
+  // Calculate list height based on available space and screen size
+  const listHeight = useMemo(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    const maxItems = Math.min(filteredData.length, isMobile ? 3 : 6);
+    return Math.min(maxItems * itemHeight + 20, isMobile ? 560 : 480);
+  }, [filteredData.length, itemHeight]);
+
+  // Row renderer for react-window (virtualized list)
+  interface RowProps {
+    index: number;
+    style: React.CSSProperties;
+    data: AgreementData[];
+  }
+
+  const Row = ({ index, style, data }: RowProps) => {
+    const entry = data[index];
+    return (
+      <div style={style} className="px-1 py-1">
+        <div
+          className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors h-full"
+          onClick={() => handleEntrySelect(entry)}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 h-full">
+            <div className="min-w-0">
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Name
+              </label>
+              <p className="font-medium text-gray-900 text-sm leading-tight break-words line-clamp-2">{entry.name}</p>
+            </div>
+            <div className="min-w-0">
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Asset Name
+              </label>
+              <p className="font-medium text-gray-900 text-sm leading-tight break-words line-clamp-2">{entry.assetName}</p>
+            </div>
+            <div className="min-w-0 sm:col-span-2 lg:col-span-1">
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Asset ID
+              </label>
+              <p className="font-medium text-gray-900 text-sm leading-tight break-words line-clamp-1">{entry.assetId}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  // End Row renderer
+
   if (showSelection && parsedData.length > 0) {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6">
@@ -164,17 +219,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
             </h3>
             <button
               onClick={handleBackToUpload}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start sm:self-auto"
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start sm:self-auto whitespace-nowrap"
             >
               Upload Different File
             </button>
           </div>
           
-          <p className="text-gray-600 mb-6 text-sm sm:text-base">
+          <p className="text-gray-600 mb-4 text-sm sm:text-base">
             Found {parsedData.length} entries. {searchTerm && `Showing ${filteredData.length} matching results.`} Select one to generate the agreement:
           </p>
           
-          <div className="mb-6">
+          <div className="mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
@@ -182,49 +237,32 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
                 placeholder="Search by name, asset name, or asset ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
             </div>
           </div>
-          
-          <div className="space-y-3 max-h-[60vh] sm:max-h-96 overflow-y-auto">
+
+          <div className="rounded-lg overflow-hidden">
             {filteredData.length > 0 ? (
-              filteredData.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors"
-                  onClick={() => handleEntrySelect(entry)}
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    <div className="min-w-0">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
-                        Name
-                      </label>
-                      <p className="font-medium text-gray-900 text-sm sm:text-base break-words">{entry.name}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
-                        Asset Name
-                      </label>
-                      <p className="font-medium text-gray-900 text-sm sm:text-base break-words">{entry.assetName}</p>
-                    </div>
-                    <div className="min-w-0 sm:col-span-2 lg:col-span-1">
-                      <label className="block text-xs font-medium text-gray-500 mb-1">
-                        Asset ID
-                      </label>
-                      <p className="font-medium text-gray-900 text-sm sm:text-base break-words">{entry.assetId}</p>
-                    </div>
-                  </div>
-                </div>
-              ))
+              <List
+                height={listHeight}
+                itemCount={filteredData.length}
+                itemSize={itemHeight}
+                width="100%"
+                itemData={filteredData}
+                className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+              >
+                {Row}
+              </List>
             ) : (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 px-4 text-gray-500">
                 <Search className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                 <p className="text-sm sm:text-base">No entries match your search criteria.</p>
                 <p className="text-xs sm:text-sm mt-1">Try adjusting your search terms.</p>
               </div>
             )}
           </div>
+
         </div>
       </div>
     );
