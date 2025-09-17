@@ -147,7 +147,7 @@ export const pdfStyles = `
   }
 `;
 
-// Simple HTML template
+// Function to create HTML content for the PDF
 const createAgreementHTML = (data: AgreementData): string => {
   const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
