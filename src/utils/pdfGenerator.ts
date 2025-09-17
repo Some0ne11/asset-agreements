@@ -182,6 +182,9 @@ const createAgreementHTML = (data: AgreementData): string => {
             <div class="detail-row">
                 <strong>Asset ID:</strong> ${data.assetId}
             </div>
+            <div class="detail-row">
+                <strong>Additional Assets:</strong> ${data.additionalAssets}
+            </div>
         </div>
 
         <!-- Agreement Paragraph -->
