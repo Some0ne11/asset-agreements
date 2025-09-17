@@ -252,7 +252,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
             </div>
             <div className="p-3 sm:p-4">
               <iframe
-                src={previewUrl}
+                src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
                 className="w-full h-64 sm:h-80 lg:h-96 border border-gray-300 rounded"
                 title="PDF Preview"
               />
