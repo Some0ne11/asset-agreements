@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, User, Package, Hash } from 'lucide-react';
+import { Plus, User, Package, Tag } from 'lucide-react';
 import type { AgreementData } from '../types';
 
 interface ManualInputProps {
@@ -110,7 +110,7 @@ export const ManualInput: React.FC<ManualInputProps> = ({ onDataSubmit }) => {
 
           <div>
             <label htmlFor="assetId" className="block text-sm font-medium text-gray-700 mb-2">
-              <Hash className="inline h-4 w-4 mr-1" />
+              <Tag className="inline h-4 w-4 mr-1" />
               Asset ID
             </label>
             <input
