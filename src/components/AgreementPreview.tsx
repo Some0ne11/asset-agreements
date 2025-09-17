@@ -18,6 +18,15 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedAdditionalAssets, setSelectedAdditionalAssets] = useState<string[]>([]);
+
+  // Common additional assets
+  const additionalAssets = [
+    { id: 'power-cord', name: 'Power Cord' },
+    { id: 'mouse', name: 'Mouse' },
+    { id: 'keyboard', name: 'Keyboard' },
+    { id: 'carrying-bag', name: 'Carrying Bag' },
+  ];
 
   const handleSignatureComplete = (signature: string) => {
     setSignatureData(signature);
@@ -32,9 +41,14 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
 
     setIsGenerating(true);
     try {
+      const additionalAssetsData = selectedAdditionalAssets
+        .map(assetId => additionalAssets.find(asset => asset.id === assetId)?.name)
+        .filter((name): name is string => Boolean(name));
+
       const pdfDataUrl = await generatePDF({
         ...data,
-        signature: signatureData
+        signature: signatureData,
+        additionalAssets: additionalAssetsData
       }, false) as string;
       
       setPreviewUrl(pdfDataUrl);
@@ -55,9 +69,14 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
 
     setIsGenerating(true);
     try {
+      const additionalAssetsData = selectedAdditionalAssets
+        .map(assetId => additionalAssets.find(asset => asset.id === assetId)?.name)
+        .filter((name): name is string => Boolean(name));
+
       await generatePDF({
         ...data,
-        signature: signatureData
+        signature: signatureData,
+        additionalAssets: additionalAssetsData
       }, true);
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -132,6 +151,15 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                 
                 <p className="break-words">
                   <strong>Asset:</strong> {data.assetName} (ID: {data.assetId})
+                  {selectedAdditionalAssets.length > 0 && (
+                    <span>
+                      <br />
+                      <strong>Additional Assets:</strong> {selectedAdditionalAssets
+                        .map(assetId => additionalAssets.find(asset => asset.id === assetId)?.name)
+                        .filter((name): name is string => Boolean(name))
+                        .join(', ')}
+                    </span>
+                  )}
                 </p>
 
                 <p>
@@ -144,6 +172,46 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                   <li>Agreement to return the asset upon termination of employment</li>
                   <li>Understanding that any damage or loss may result in deduction from final pay</li>
                 </ul>
+              </div>
+
+              {/* Additional Assets Section */}
+              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+                <h4 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Additional Assets (Optional)</h4>
+                <p className="text-xs sm:text-sm text-gray-600 mb-4">
+                  Please check any additional assets received with the main item:
+                </p>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {additionalAssets.map((asset) => (
+                    <label key={asset.id} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedAdditionalAssets.includes(asset.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedAdditionalAssets([...selectedAdditionalAssets, asset.id]);
+                          } else {
+                            setSelectedAdditionalAssets(selectedAdditionalAssets.filter(id => id !== asset.id));
+                          }
+                        }}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                      />
+                      <span className="text-xs sm:text-sm text-gray-700">{asset.name}</span>
+                    </label>
+                  ))}
+                </div>
+                
+                {selectedAdditionalAssets.length > 0 && (
+                  <div className="mt-4 p-3 sm:p-4 bg-blue-50 rounded-lg">
+                    <h5 className="text-sm font-medium text-blue-900 mb-2">Selected Additional Assets:</h5>
+                    <ul className="text-xs sm:text-sm text-blue-800 space-y-1">
+                      {selectedAdditionalAssets.map(assetId => {
+                        const asset = additionalAssets.find(a => a.id === assetId);
+                        return asset ? <li key={assetId}>• {asset.name}</li> : null;
+                      })}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Signature Section */}
