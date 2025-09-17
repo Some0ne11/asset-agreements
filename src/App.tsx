@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileUp, Edit, FileText } from 'lucide-react';
 import { FileUpload } from './components/FileUpload';
 import { ManualInput } from './components/ManualInput';
@@ -15,20 +15,50 @@ function App() {
 
   const handleFileDataParsed = (data: AgreementData[]) => {
     if (data.length > 0) {
-      // For now, we'll handle the first entry. In a full app, you'd want to handle multiple entries
-      setCurrentAgreement(data[0]);
+      const agreement = data[0]; // for now only first entry
+      setCurrentAgreement(agreement);
       setViewMode('preview');
+
+      // Save to localStorage
+      localStorage.setItem("currentAgreement", JSON.stringify(agreement));
+      localStorage.setItem("inputMode", "file");
     }
   };
 
   const handleManualDataSubmit = (data: AgreementData) => {
     setCurrentAgreement(data);
     setViewMode('preview');
+
+    // Save to localStorage
+    //localStorage.setItem("currentAgreement", JSON.stringify(data));
+    //localStorage.setItem("inputMode", "manual");
   };
+
+  useEffect(() => {
+    const savedAgreement = localStorage.getItem("currentAgreement");
+    const savedInputMode = localStorage.getItem("inputMode");
+
+    if (savedAgreement) {
+      try {
+        const parsed: AgreementData = JSON.parse(savedAgreement);
+        setCurrentAgreement(parsed);
+        setViewMode('preview');
+        if (savedInputMode === "manual" || savedInputMode === "file") {
+          setInputMode(savedInputMode as InputMode);
+        }
+      } catch (err) {
+        console.error("Error parsing saved agreement", err);
+      }
+    }
+  }, []);
 
   const handleBackToInput = () => {
     setViewMode('input');
     setCurrentAgreement(null);
+
+    // Clear persisted data
+    localStorage.removeItem("currentAgreement");
+    localStorage.removeItem("inputMode");
   };
 
   return (
