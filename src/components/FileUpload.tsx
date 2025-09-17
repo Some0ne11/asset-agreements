@@ -160,7 +160,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
           
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {filteredData.length > 0 ? (
-              filteredData.map((entry, index) => (
+              filteredData.map((entry) => (
                 <div
                   key={entry.id}
                   className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-colors"
