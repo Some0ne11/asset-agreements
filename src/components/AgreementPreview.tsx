@@ -326,11 +326,18 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
             
             {/* Modal Content */}
             <div className="flex-1 p-4 min-h-0">
-              <iframe
-                src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+              <object
+                data={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+                type="application/pdf"
                 className="w-full h-full border border-gray-300 rounded"
-                title="PDF Preview"
-              />
+              >
+                <p className="text-center">
+                  PDF preview not supported on this device. 
+                  <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                    Open PDF
+                  </a>
+                </p>
+              </object>
             </div>
           </div>
         </div>
