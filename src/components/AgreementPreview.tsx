@@ -28,11 +28,13 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
     { id: 'carrying-bag', name: 'Carrying Bag' },
   ];
 
+  // Handle signature completion
   const handleSignatureComplete = (signature: string) => {
     setSignatureData(signature);
     setShowSignaturePad(false);
   };
 
+  // Handle PDF preview generation
   const handlePreviewPDF = async () => {
     if (!signatureData) {
       alert('Please add your signature before previewing');
@@ -93,10 +95,10 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className={`grid gap-4 sm:gap-6 ${showPreview && previewUrl ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'}`}>
+    <div className="min-h-screen py-4 sm:py-6">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Agreement Form */}
-        <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${!showPreview || !previewUrl ? 'max-w-4xl mx-auto' : ''}`}>
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
           <div className="bg-blue-600 text-white p-4 sm:p-6">
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold flex items-center">
@@ -108,7 +110,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
 
           {/* Agreement Content */}
           <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
-            <div className="flex items-center justify-between mb-4 sm:mb-6 lg:mb-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center text-xs sm:text-sm text-gray-600">
                 <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
                 <span className="break-words">Date: {currentDate}</span>
@@ -120,7 +122,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                 Asset Assignment Agreement
               </h3>
               
-              <div className="bg-gray-50 p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
+              <div className="bg-gray-100 p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
                 <div className="space-y-3 sm:space-y-4">
                   <div className="min-w-0">
                     <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
@@ -299,11 +301,14 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
             </div>
           </div>
         </div>
+      </div>
 
-        {/* PDF Preview */}
-        {showPreview && previewUrl && (
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden xl:sticky xl:top-4">
-            <div className="bg-gray-800 text-white p-3 sm:p-4">
+      {/* PDF Preview Overlay Modal */}
+      {showPreview && previewUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-4xl h-full max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="bg-gray-800 text-white p-3 sm:p-4 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <h3 className="text-base sm:text-lg font-semibold flex items-center">
                   <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
@@ -311,24 +316,27 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                 </h3>
                 <button
                   onClick={() => setShowPreview(false)}
-                  className="text-gray-300 hover:text-white p-1 rounded"
+                  className="text-gray-300 hover:text-white p-1 rounded hover:bg-gray-700 transition-colors"
                   aria-label="Close preview"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
             </div>
-            <div className="p-3 sm:p-4">
+            
+            {/* Modal Content */}
+            <div className="flex-1 p-3 sm:p-4 min-h-0">
               <iframe
-                src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                className="w-full h-64 sm:h-80 lg:h-96 border border-gray-300 rounded"
+                src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1`}
+                className="w-full h-full border border-gray-300 rounded"
                 title="PDF Preview"
               />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
+      {/* Signature Pad Modal */}
       {showSignaturePad && (
         <SignaturePad
           onSignatureComplete={handleSignatureComplete}
