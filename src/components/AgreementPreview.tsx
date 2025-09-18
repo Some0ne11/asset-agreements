@@ -325,18 +325,36 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
             </div>
             
             {/* Modal Content */}
-            <div className="flex-1 p-4 min-h-0">
+            <div className="flex-1 p-6 min-h-0">
               <object
                 data={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1`}
                 type="application/pdf"
-                className="w-full h-full border border-gray-300 rounded"
-              >
-                <p className="text-center">
-                  PDF preview not supported on this device. 
-                  <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-                    Open PDF
-                  </a>
-                </p>
+                className="w-full h-full rounded-md shadow-lg border border-gray-200 bg-white"
+                >
+                <div className="flex items-center justify-center h-full p-8 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="text-center max-w-md">
+                    <div className="p-4 bg-blue-50 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                      <FileText className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      PDF Preview Not Available
+                    </h3>
+                    <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                      Your browser doesn't support inline PDF viewing.
+                    </p>
+                    <a 
+                      href={previewUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-sm"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Open PDF
+                    </a>
+                  </div>
+                </div>
               </object>
             </div>
           </div>
