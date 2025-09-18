@@ -30,8 +30,8 @@ function App() {
     setViewMode('preview');
 
     // Save to localStorage
-    //localStorage.setItem("currentAgreement", JSON.stringify(data));
-    //localStorage.setItem("inputMode", "manual");
+    localStorage.setItem("currentAgreement", JSON.stringify(data));
+    localStorage.setItem("inputMode", "manual");
   };
 
   useEffect(() => {
