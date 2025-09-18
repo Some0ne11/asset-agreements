@@ -128,7 +128,6 @@ export const pdfStyles = `
   
   .footer-line {
     border-top: 1px solid #ccc;
-    padding-top: 1rem;
     text-align: center;
     font-size: 12px;
     color: #999;
@@ -235,6 +234,10 @@ const createAgreementHTML = (data: AgreementData): string => {
             <div class="footer-line">
                 This agreement is legally binding and has been digitally signed.
             </div>
+
+            <!-- Extra space to avoid cutting off content -->
+            <div style="height: 80px;"></div>
+
         </div>
     </body>
     </html>
@@ -248,10 +251,11 @@ export const generatePDF = async (data: AgreementData, download: boolean = true)
     
     const options = {
       margin: 0.75,
+      // pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
       filename: `Asset_Agreement_${data.name.replace(/[^a-zA-Z0-9]/g, '_')}_${data.assetId}_${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'png', quality: 1.0 },
       html2canvas: { 
-        scale: 2,
+        scale: 3,
         useCORS: true,
         letterRendering: true
       },
