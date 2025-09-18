@@ -183,7 +183,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
                 }}
               />
             </div>
-            
+
             {/* Status Text */}
             <div className="flex items-center justify-between mt-3 sm:mt-4">
               <p className="text-xs sm:text-sm text-gray-500">
@@ -199,13 +199,8 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
                   </span>
                 )}
               </p>
-              
-              {isMobile && (
-                <p className="text-xs text-gray-400">
-                  Rotate device for larger canvas
-                </p>
-              )}
             </div>
+
           </div>
         </div>
 
