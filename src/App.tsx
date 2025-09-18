@@ -71,7 +71,7 @@ function App() {
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4 leading-relaxed">
             Generate professional asset agreements with digital signatures. 
-            Upload CSV data or enter information manually.
+            Upload CSV/Excel data or enter information manually.
           </p>
         </div>
 
