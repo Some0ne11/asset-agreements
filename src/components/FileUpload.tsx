@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { Upload, FileText, AlertCircle, Users, Search } from 'lucide-react';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import { FixedSizeList as List } from 'react-window';
 import type { AgreementData, ParsedRow } from '../types';
 
@@ -16,80 +17,163 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
   const [showSelection, setShowSelection] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const processFile = useCallback((file: File) => {
+  // Function to parse Excel (.xlsx) files
+  const parseExcelFile = useCallback((file: File) => {
+    return new Promise<AgreementData[]>((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          
+          // Get the first worksheet
+          const worksheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[worksheetName];
+          
+          // Convert to JSON with header row
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          
+          if (jsonData.length < 2) {
+            reject(new Error('Excel file must have at least a header row and one data row'));
+            return;
+          }
+          
+          // Get headers and convert to lowercase for matching
+          const headers = (jsonData[0] as string[]).map(h => h?.toString().toLowerCase().trim());
+          const dataRows = jsonData.slice(1) as any[][];
+          
+          // Find column indices
+          const nameIndex = headers.findIndex(h => 
+            h === 'name' || h.includes('name')
+          );
+          const assetNameIndex = headers.findIndex(h => 
+            h === 'assetname' || h === 'asset name' || h === 'asset_name' || h.includes('asset')
+          );
+          const assetIdIndex = headers.findIndex(h => 
+            h === 'assetid' || h === 'asset id' || h === 'asset_id' || h.includes('id')
+          );
+          
+          if (nameIndex === -1) {
+            reject(new Error('Could not find "name" column in Excel file'));
+            return;
+          }
+          
+          const agreementData: AgreementData[] = dataRows
+            .filter(row => row[nameIndex]) // Filter out empty rows
+            .map((row, index) => ({
+              id: `entry-${index}`,
+              name: row[nameIndex]?.toString() || '',
+              assetName: row[assetNameIndex]?.toString() || '',
+              assetId: row[assetIdIndex]?.toString() || ''
+            }))
+            .filter(item => item.name.trim()); // Remove entries with empty names
+          
+          resolve(agreementData);
+        } catch (err) {
+          reject(new Error(`Excel parsing error: ${err instanceof Error ? err.message : 'Unknown error'}`));
+        }
+      };
+      
+      reader.onerror = () => reject(new Error('Error reading Excel file'));
+      reader.readAsArrayBuffer(file);
+    });
+  }, []);
+
+  // Function to parse CSV (.csv) files
+  const parseCsvFile = useCallback((file: File) => {
+    return new Promise<AgreementData[]>((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          
+          Papa.parse(content, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              try {
+                const data = results.data as ParsedRow[];
+                const agreementData: AgreementData[] = data
+                  .filter(row => row.name || row.Name) // Filter out empty rows
+                  .map((row, index) => ({
+                    id: `entry-${index}`,
+                    name: row.name || row.Name || '',
+                    assetName: row.assetName || row['Asset Name'] || row.asset_name || '',
+                    assetId: row.assetId || row['Asset ID'] || row.asset_id || ''
+                  }));
+                
+                resolve(agreementData);
+              } catch (err) {
+                reject(new Error(`CSV data processing error: ${err instanceof Error ? err.message : 'Unknown error'}`));
+              }
+            },
+            error: (error: any) => {
+              reject(new Error(`CSV parsing error: ${error.message}`));
+            }
+          });
+        } catch (err) {
+          reject(new Error('Error reading CSV file'));
+        }
+      };
+
+      reader.onerror = () => reject(new Error('Error reading CSV file'));
+      reader.readAsText(file);
+    });
+  }, []);
+
+  // Process uploaded file (CSV or Excel)
+  const processFile = useCallback(async (file: File) => {
     setIsLoading(true);
     setError(null);
     setShowSelection(false);
     setParsedData([]);
 
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        
-        if (file.name.endsWith('.csv')) {
-          Papa.parse(content, {
-            header: true,
-            complete: (results) => {
-              const data = results.data as ParsedRow[];
-              const agreementData: AgreementData[] = data
-                .filter(row => row.name || row.Name) // Filter out empty rows
-                .map((row, index) => ({
-                  id: `entry-${index}`,
-                  name: row.name || row.Name || '',
-                  assetName: row.assetName || row['Asset Name'] || row.asset_name || '',
-                  assetId: row.assetId || row['Asset ID'] || row.asset_id || ''
-                }));
-              
-              if (agreementData.length === 0) {
-                setError('No valid data found. Please ensure your CSV has columns: name, assetName, assetId');
-              } else if (agreementData.length === 1) {
-                // Single entry, proceed directly
-                onDataParsed(agreementData);
-              } else {
-                // Multiple entries, show selection
-                setParsedData(agreementData);
-                setShowSelection(true);
-                
-                // Save parsed entries
-                localStorage.setItem("parsedData", JSON.stringify(agreementData));
-              }
-              setIsLoading(false);
-            },
-            error: (error) => {
-              setError(`CSV parsing error: ${error.message}`);
-              setIsLoading(false);
-            }
-          });
-        } else {
-          setError('Please upload a CSV file. Excel files (.xlsx) are not supported in this version.');
-          setIsLoading(false);
-        }
-      } catch (err) {
-        setError('Error reading file');
-        setIsLoading(false);
+    try {
+      let agreementData: AgreementData[];
+
+      if (file.name.endsWith('.csv')) {
+        agreementData = await parseCsvFile(file);
+      } else if (file.name.endsWith('.xlsx')) {
+        agreementData = await parseExcelFile(file);
+      } else {
+        throw new Error('Please upload a CSV (.csv) or Excel (.xlsx) file ONLY');
       }
-    };
 
-    reader.onerror = () => {
-      setError('Error reading file');
+      if (agreementData.length === 0) {
+        setError('No valid data found. Please ensure your file has the required columns: name, assetName, assetId');
+      } else if (agreementData.length === 1) {
+        // Single entry, proceed directly
+        onDataParsed(agreementData);
+      } else {
+        // Multiple entries, show selection
+        setParsedData(agreementData);
+        setShowSelection(true);
+        
+        // Save parsed entries
+        localStorage.setItem("parsedData", JSON.stringify(agreementData));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error occurred while processing file');
+    } finally {
       setIsLoading(false);
-    };
+    }
+  }, [onDataParsed, parseCsvFile, parseExcelFile]);
 
-    reader.readAsText(file);
-  }, [onDataParsed]);
-
+  // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
   }, []);
 
+  // Drag leave handler
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
   }, []);
 
+  // Drop handler
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
@@ -100,7 +184,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
     if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xlsx'))) {
       processFile(file);
     } else {
-      setError('Please upload a CSV or Excel file');
+      setError('Please upload a CSV (.csv) or Excel (.xlsx) file ONLY');
     }
   }, [processFile]);
 
@@ -226,7 +310,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
           </div>
           
           <p className="text-gray-600 mb-4 text-sm sm:text-base">
-            Found {parsedData.length} entries. {searchTerm && `Showing ${filteredData.length} matching results.`} Select one to generate the agreement:
+            Found <span className="font-bold">{parsedData.length}</span> entries.{" "} 
+            {searchTerm && (
+              <>
+                Showing <span className="font-bold">{filteredData.length}</span> matching results.
+              </>
+            )}{" "}
+            Select one to generate the agreement:
           </p>
           
           <div className="mb-4">
@@ -296,10 +386,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
               <Upload className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
               <div>
                 <p className="text-base sm:text-lg font-medium text-gray-900 break-words">
-                  Drop your CSV file here, or click to browse
+                  Drop your CSV or Excel file here, or click to browse
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 break-words">
-                  CSV files with columns: name, assetName, assetId
+                  CSV (.csv) or Excel (.xlsx) files with columns: name, assetName, assetId
                 </p>
               </div>
             </>
@@ -317,13 +407,25 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
       <div className="mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
         <div className="flex items-center space-x-2 mb-2">
           <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 flex-shrink-0" />
-          <span className="font-medium text-gray-900 text-sm sm:text-base">Expected CSV Format:</span>
+          <span className="font-medium text-gray-900 text-sm sm:text-base">Expected File Format:</span>
         </div>
-        <div className="text-xs sm:text-sm text-gray-600 font-mono bg-white p-2 sm:p-3 rounded border overflow-x-auto">
-          <div className="whitespace-pre-wrap break-all sm:break-normal">
-            name,assetName,assetId<br />
-            John Doe,Laptop Computer,LT001<br />
-            Jane Smith,Office Chair,CH002
+        <div className="text-xs sm:text-sm text-gray-600">
+          <div className="bg-white p-2 sm:p-3 rounded border mb-2">
+            <strong>CSV Format:</strong>
+            <div className="font-mono mt-1 overflow-x-auto">
+              <div className="whitespace-pre-wrap break-all sm:break-normal">
+                name,assetName,assetId<br />
+                John Doe,Laptop Computer,LT001<br />
+                Jane Smith,Office Chair,CH002
+              </div>
+            </div>
+          </div>
+          <div className="bg-white p-2 sm:p-3 rounded border">
+            <strong>Excel Format:</strong>
+            <div className="mt-1">
+              Excel (.xlsx) files with headers in the first row and data in subsequent rows.
+              Column names should include "name", "assetName" (or "Asset Name"), and "assetId" (or "Asset ID").
+            </div>
           </div>
         </div>
       </div>
