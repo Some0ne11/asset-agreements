@@ -249,7 +249,7 @@ export const generatePDF = async (data: AgreementData, download: boolean = true)
     const options = {
       margin: 0.75,
       filename: `Asset_Agreement_${data.name.replace(/[^a-zA-Z0-9]/g, '_')}_${data.assetId}_${new Date().toISOString().split('T')[0]}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'png', quality: 1.0 },
       html2canvas: { 
         scale: 2,
         useCORS: true,
