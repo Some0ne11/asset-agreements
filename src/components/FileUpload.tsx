@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { Upload, FileText, AlertCircle, Users, Search, RefreshCcw } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Users, Search, RefreshCw } from 'lucide-react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { FixedSizeList as List } from 'react-window';
@@ -17,6 +17,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
   const [showSelection, setShowSelection] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [listKey, setListKey] = useState(0); // Key to force list re-render
+  const [showReloadNotification, setShowReloadNotification] = useState(false);
 
   // Function to parse Excel (.xlsx) files
   const parseExcelFile = useCallback((file: File) => {
@@ -243,6 +244,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
   const handleReload = useCallback(() => {
     setListKey(prev => prev + 1); // Force list re-render
     setSearchTerm(''); // Clear search to show all items
+    
+    // Show notification
+    setShowReloadNotification(true);
+    setTimeout(() => setShowReloadNotification(false), 2000); // Hide after 2 seconds
   }, []);
 
   // Auto-reload on screen size changes
@@ -313,6 +318,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
     return (
       <div className="w-full max-w-4xl mx-auto px-4 sm:px-6">
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
               <Users className="h-5 w-5 mr-2 flex-shrink-0" />
@@ -321,9 +327,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 self-start sm:self-auto">
               <button
                 onClick={handleBackToUpload}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium whitespace-nowrap"
+                className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap px-4 py-2 rounded-lg transition-colors duration-200"
               >
-                Upload Different File
+                Upload different file
               </button>
             </div>
           </div>
@@ -338,28 +344,28 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
             Select one to generate the agreement:
           </p>
           
-          
           <div className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by name, asset name, or asset ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-              />
-            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name, asset name, or asset ID..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                />
+              </div>
 
               <button
                 onClick={handleReload}
-                className="flex items-center mt-5 justify-center sm:justify-start text-green-600 hover:text-green-800 text-sm font-medium whitespace-nowrap"
+                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium whitespace-nowrap px-4 py-2 sm:py-3 rounded-lg transition-colors duration-200"
                 title="Reload list"
               >
-                <RefreshCcw className="h-100 w-100 flex-shrink-0" />
-                Reload List
+                <RefreshCw className="h-4 w-4 flex-shrink-0" />
+                <span className="ml-2 hidden sm:inline">Reload List</span>
               </button>
-
+            </div>
           </div>
 
           <div className="rounded-lg overflow-hidden">
@@ -382,8 +388,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
                 <p className="text-xs sm:text-sm mt-1">Try adjusting your search terms.</p>
               </div>
             )}
-          </div>
 
+            {/* Toast Notification */}
+            {showReloadNotification && (
+              <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-in slide-in-from-right-5 duration-300">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium">List reloaded successfully!</span>
+                </div>
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
     );
