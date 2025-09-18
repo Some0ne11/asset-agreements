@@ -88,7 +88,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
     }
   };
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  const currentDate = new Date().toLocaleDateString('en-MY', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
