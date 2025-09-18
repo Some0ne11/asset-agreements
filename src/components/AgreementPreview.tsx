@@ -323,7 +323,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                 </button>
               </div>
             </div>
-            
+
             {/* Modal Content */}
             <div className="flex-1 p-6 min-h-0">
               <object
@@ -340,7 +340,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                       PDF Preview Not Available
                     </h3>
                     <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                      Your browser doesn't support inline PDF viewing.
+                      Your device doesn't support inline PDF viewing.
                     </p>
                     <a 
                       href={previewUrl} 
@@ -357,6 +357,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
                 </div>
               </object>
             </div>
+
           </div>
         </div>
       )}
