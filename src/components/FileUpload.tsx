@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { Upload, FileText, AlertCircle, Users, Search, RefreshCw, SquareX } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Search, RefreshCw, SquareX, Lock } from 'lucide-react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { FixedSizeList as List } from 'react-window';
@@ -321,22 +321,45 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Users className="h-5 w-5 mr-2 flex-shrink-0" />
-              <span className="break-words">Select Entry to Generate Agreement</span>
+              <FileText className="h-5 w-5 mr-2 flex-shrink-0" />
+              <span>Uploaded File</span>
             </h3>
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 self-start sm:self-auto">
               <button
-                onClick={handleBackToUpload}
+                onClick={() => {
+                  const confirmed = window.confirm(
+                    "Are you sure you want to remove the file? This action cannot be undone."
+                  );
+                  if (confirmed) {
+                    handleBackToUpload();
+                  }
+                }}
                 className="flex items-center justify-center bg-red-500 hover:bg-red-700 text-white text-sm font-medium whitespace-nowrap px-4 py-2 rounded-lg transition-colors duration-200"
+                title="Remove File and Upload New"
               >
                 <SquareX className="h-4 w-4 flex-shrink-0" />
-                <span className="ml-2">
-                Remove List
-                </span>
+                <span className="ml-2">Remove File</span>
               </button>
             </div>
           </div>
-          
+
+          {/* Privacy Notice */}
+          <div className="mb-4 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <Lock className="h-5 w-5 text-blue-700" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700 font-medium">Privacy Notice:</p>
+                <ul className="list-disc pl-5 text-sm text-blue-700 space-y-1">
+                  <li>Your uploaded file is stored only in your browser and never sent to a server.</li>
+                  <li>The file will remain in your browser until you choose <strong>Remove File</strong>.</li>
+                  <li>Please ensure you have a backup copy of the original file on your device.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
           <p className="text-gray-600 mb-4 text-sm sm:text-base">
             Found <span className="font-bold">{parsedData.length}</span> entries.{" "} 
             {searchTerm && (
@@ -346,7 +369,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
             )}{" "}
             Select one to generate the agreement:
           </p>
-          
+
           <div className="mb-4">
             <div className="flex items-center gap-3">
               <div className="relative flex-1">
@@ -363,38 +386,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
               <button
                 onClick={handleReload}
                 className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium whitespace-nowrap px-4 py-2 sm:py-3 rounded-lg transition-colors duration-200"
-                title="Reload list"
+                title="Reload List"
               >
                 <RefreshCw className="h-4 w-4 flex-shrink-0" />
                 <span className="ml-2 hidden sm:inline">Reload List</span>
               </button>
-            </div>
-          </div>
-
-          {/* Privacy Notice */}
-          <div className="mb-4 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-blue-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-blue-700 font-medium">Privacy Notice:</p>
-                <ul className="list-disc pl-5 text-sm text-blue-700 space-y-1">
-                  <li>Your uploaded file is stored only in your browser and never sent to a server.</li>
-                  <li>The file will be permanently removed when you click <strong>Remove List</strong>.</li>
-                  <li>Please ensure you have a backup copy of the original file on your device.</li>
-                </ul>
-              </div>
             </div>
           </div>
 
