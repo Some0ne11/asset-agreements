@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { Upload, FileText, AlertCircle, Search, RefreshCw, SquareX, Lock } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Search, RefreshCw, Lock, Trash2 } from 'lucide-react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { FixedSizeList as List } from 'react-window';
@@ -337,7 +337,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
                 className="flex items-center justify-center bg-red-500 hover:bg-red-700 text-white text-sm font-medium whitespace-nowrap px-4 py-2 rounded-lg transition-colors duration-200"
                 title="Remove File and Upload New"
               >
-                <SquareX className="h-4 w-4 flex-shrink-0" />
+                <Trash2 className="h-4 w-4 flex-shrink-0" />
                 <span className="ml-2">Remove File</span>
               </button>
             </div>
