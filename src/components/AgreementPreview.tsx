@@ -303,15 +303,15 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
         </div>
       </div>
 
-      {/* PDF Preview Overlay Modal */}
+      {/* PDF Preview Overlay Modal - Fixed width for consistency */}
       {showPreview && previewUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-4xl h-full max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col">
+          <div className="relative w-full max-w-5xl bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col" style={{ height: '90vh' }}>
             {/* Modal Header */}
-            <div className="bg-gray-800 text-white p-3 sm:p-4 flex-shrink-0">
+            <div className="bg-gray-800 text-white p-4 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <h3 className="text-base sm:text-lg font-semibold flex items-center">
-                  <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0" />
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Eye className="h-5 w-5 mr-2 flex-shrink-0" />
                   PDF Preview
                 </h3>
                 <button
@@ -325,7 +325,7 @@ export const AgreementPreview: React.FC<AgreementPreviewProps> = ({
             </div>
             
             {/* Modal Content */}
-            <div className="flex-1 p-3 sm:p-4 min-h-0">
+            <div className="flex-1 p-4 min-h-0">
               <iframe
                 src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=1`}
                 className="w-full h-full border border-gray-300 rounded"
