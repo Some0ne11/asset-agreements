@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { Upload, FileText, AlertCircle, Users, Search, RefreshCw } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Users, Search, RefreshCw, SquareX } from 'lucide-react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { FixedSizeList as List } from 'react-window';
@@ -327,9 +327,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 self-start sm:self-auto">
               <button
                 onClick={handleBackToUpload}
-                className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium whitespace-nowrap px-4 py-2 rounded-lg transition-colors duration-200"
+                className="flex items-center justify-center bg-red-500 hover:bg-red-700 text-white text-sm font-medium whitespace-nowrap px-4 py-2 rounded-lg transition-colors duration-200"
               >
-                Upload different file
+                <SquareX className="h-4 w-4 flex-shrink-0" />
+                <span className="ml-2">
+                Remove List
+                </span>
               </button>
             </div>
           </div>
@@ -365,6 +368,33 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
                 <RefreshCw className="h-4 w-4 flex-shrink-0" />
                 <span className="ml-2 hidden sm:inline">Reload List</span>
               </button>
+            </div>
+          </div>
+
+          {/* Privacy Notice */}
+          <div className="mb-4 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-blue-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700 font-medium">Privacy Notice:</p>
+                <ul className="list-disc pl-5 text-sm text-blue-700 space-y-1">
+                  <li>Your uploaded file is stored only in your browser and never sent to a server.</li>
+                  <li>The file will be permanently removed when you click <strong>Remove List</strong>.</li>
+                  <li>Please ensure you have a backup copy of the original file on your device.</li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -475,6 +505,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };
