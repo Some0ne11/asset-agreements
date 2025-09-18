@@ -40,7 +40,6 @@ export const pdfStyles = `
   }
   
   .details {
-    margin-bottom: 3rem;
     background: #f9f9f9;
     padding: 1.5rem;
     border-radius: 4px;
@@ -63,7 +62,6 @@ export const pdfStyles = `
   }
   
   .agreement-text {
-    margin-bottom: 4rem;
     text-align: justify;
     line-height: 2;
     font-size: 14px;
@@ -74,7 +72,7 @@ export const pdfStyles = `
   }
   
   .footer {
-    margin-top: 4rem;
+    margin-top: 2rem;
   }
   
   .signature-area {
@@ -149,7 +147,7 @@ export const pdfStyles = `
 
 // Function to create HTML content for the PDF
 const createAgreementHTML = (data: AgreementData): string => {
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  const currentDate = new Date().toLocaleDateString('en-MY', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -182,9 +180,12 @@ const createAgreementHTML = (data: AgreementData): string => {
             <div class="detail-row">
                 <strong>Asset ID:</strong> ${data.assetId}
             </div>
-            <div class="detail-row">
-                <strong>Additional Assets:</strong> ${data.additionalAssets}
-            </div>
+            ${Array.isArray(data.additionalAssets) && data.additionalAssets.length > 0 ?
+              `<div class="detail-row">
+                <strong>Additional Assets:</strong> ${data.additionalAssets.join(", ")}
+              </div>` 
+              : ``
+              }
         </div>
 
         <!-- Agreement Paragraph -->
@@ -220,15 +221,14 @@ const createAgreementHTML = (data: AgreementData): string => {
                     <h4>Employee Signature:</h4>
                     ${data.signature 
                         ? `<img src="${data.signature}" alt="Employee Signature" class="signature-image" />`
-                        : `<div class="signature-line"></div>`
+                        : `<p> No signature provided </p>`
                     }
+                    <div class="signature-line"></div>
                     <div class="signature-name">${data.name}</div>
                 </div>
                 
                 <div class="date-section">
-                    <h4>Date:</h4>
-                    <div class="date-value">${currentDate}</div>
-                    <div class="date-line"></div>
+                    <h4>Date: ${currentDate}</h4>
                 </div>
             </div>
             
