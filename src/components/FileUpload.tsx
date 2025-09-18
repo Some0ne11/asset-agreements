@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import { Upload, FileText, AlertCircle, Users, Search } from 'lucide-react';
+import { Upload, FileText, AlertCircle, Users, Search, RefreshCcw } from 'lucide-react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { FixedSizeList as List } from 'react-window';
@@ -16,6 +16,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
   const [parsedData, setParsedData] = useState<AgreementData[]>([]);
   const [showSelection, setShowSelection] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [listKey, setListKey] = useState(0); // Key to force list re-render
 
   // Function to parse Excel (.xlsx) files
   const parseExcelFile = useCallback((file: File) => {
@@ -238,18 +239,34 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
     entry.assetId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Reload function to refresh the list
+  const handleReload = useCallback(() => {
+    setListKey(prev => prev + 1); // Force list re-render
+    setSearchTerm(''); // Clear search to show all items
+  }, []);
+
+  // Auto-reload on screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      setListKey(prev => prev + 1); // Force list re-render on resize
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Calculate responsive item height based on screen size
   const itemHeight = useMemo(() => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
     return isMobile ? 160 : 110; // Optimized height for proper content display
-  }, []);
+  }, [listKey]); // listKey as dependency to recalculate on resize
 
   // Calculate list height based on available space and screen size
   const listHeight = useMemo(() => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
     const maxItems = Math.min(filteredData.length, isMobile ? 3 : 6);
     return Math.min(maxItems * itemHeight + 20, isMobile ? 560 : 480);
-  }, [filteredData.length, itemHeight]);
+  }, [filteredData.length, itemHeight, listKey]);
 
   // Row renderer for react-window (virtualized list)
   interface RowProps {
@@ -301,12 +318,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
               <Users className="h-5 w-5 mr-2 flex-shrink-0" />
               <span className="break-words">Select Entry to Generate Agreement</span>
             </h3>
-            <button
-              onClick={handleBackToUpload}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium self-start sm:self-auto whitespace-nowrap"
-            >
-              Upload Different File
-            </button>
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 self-start sm:self-auto">
+              <button
+                onClick={handleBackToUpload}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium whitespace-nowrap"
+              >
+                Upload Different File
+              </button>
+            </div>
           </div>
           
           <p className="text-gray-600 mb-4 text-sm sm:text-base">
@@ -319,6 +338,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
             Select one to generate the agreement:
           </p>
           
+          
           <div className="mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -330,11 +350,22 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onDataParsed }) => {
                 className="w-full pl-10 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
               />
             </div>
+
+              <button
+                onClick={handleReload}
+                className="flex items-center mt-5 justify-center sm:justify-start text-green-600 hover:text-green-800 text-sm font-medium whitespace-nowrap"
+                title="Reload list"
+              >
+                <RefreshCcw className="h-100 w-100 flex-shrink-0" />
+                Reload List
+              </button>
+
           </div>
 
           <div className="rounded-lg overflow-hidden">
             {filteredData.length > 0 ? (
               <List
+                key={listKey} // Use key to force re-render
                 height={listHeight}
                 itemCount={filteredData.length}
                 itemSize={itemHeight}
