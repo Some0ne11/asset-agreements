@@ -14,35 +14,44 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const signaturePadRef = useRef<SignaturePadLib | null>(null);
   const [isEmpty, setIsEmpty] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Fixed canvas dimensions for consistency across all devices
-  const CANVAS_WIDTH = 600;
-  const CANVAS_HEIGHT = 200;
+  useEffect(() => {
+    // Detect mobile device
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (canvasRef.current) {
       const canvas = canvasRef.current;
       
-      // Set fixed canvas size for consistency
+      // Set canvas size
+      const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       
-      canvas.width = CANVAS_WIDTH * dpr;
-      canvas.height = CANVAS_HEIGHT * dpr;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
       
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.scale(dpr, dpr);
       }
       
-      // Set CSS size to match logical canvas size
-      canvas.style.width = CANVAS_WIDTH + 'px';
-      canvas.style.height = CANVAS_HEIGHT + 'px';
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
 
       signaturePadRef.current = new SignaturePadLib(canvas, {
         backgroundColor: 'white',
         penColor: 'black',
-        minWidth: 1.5,
-        maxWidth: 2.5,
+        minWidth: isMobile ? 2 : 1,
+        maxWidth: isMobile ? 4 : 3,
         throttle: 16,
         minDistance: 5,
       });
@@ -59,25 +68,25 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       signaturePadRef.current.addEventListener('beginStroke', handleBeginStroke);
       signaturePadRef.current.addEventListener('endStroke', handleEndStroke);
 
-      // Handle window resize - maintain fixed canvas size
+      // Handle window resize
       const handleResize = () => {
         if (canvas && signaturePadRef.current) {
+          const newRect = canvas.getBoundingClientRect();
           const newDpr = window.devicePixelRatio || 1;
           
           // Save current signature data
           const signatureData = signaturePadRef.current.isEmpty() ? null : signaturePadRef.current.toData();
           
-          // Reset canvas with fixed dimensions
-          canvas.width = CANVAS_WIDTH * newDpr;
-          canvas.height = CANVAS_HEIGHT * newDpr;
+          canvas.width = newRect.width * newDpr;
+          canvas.height = newRect.height * newDpr;
           
           const newCtx = canvas.getContext('2d');
           if (newCtx) {
             newCtx.scale(newDpr, newDpr);
           }
           
-          canvas.style.width = CANVAS_WIDTH + 'px';
-          canvas.style.height = CANVAS_HEIGHT + 'px';
+          canvas.style.width = newRect.width + 'px';
+          canvas.style.height = newRect.height + 'px';
           
           // Restore signature data if it existed
           if (signatureData && signatureData.length > 0) {
@@ -100,7 +109,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
         }
       };
     }
-  }, []);
+  }, [isMobile]);
 
   const clearSignature = () => {
     if (signaturePadRef.current) {
@@ -131,26 +140,28 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4"
       onClick={handleBackdropClick}
     >
-      {/* Fixed width modal container for consistency */}
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl flex flex-col" style={{ maxHeight: '90vh' }}>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 flex-shrink-0">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                <PenTool className="h-6 w-6 mr-2 flex-shrink-0" />
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center">
+                <PenTool className="h-5 w-5 sm:h-6 sm:w-6 mr-2 flex-shrink-0" />
                 Digital Signature
               </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Sign using your mouse, trackpad, stylus, or finger
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                {isMobile 
+                  ? 'Use your finger to sign below'
+                  : 'Sign using your mouse, trackpad, or stylus'
+                }
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-1 rounded-full transition-colors"
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full transition-colors sm:hidden"
               aria-label="Close"
             >
               <X className="h-6 w-6" />
@@ -159,46 +170,52 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
         </div>
 
         {/* Canvas Area */}
-        <div className="flex-1 p-6 flex flex-col justify-center items-center overflow-auto">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
-            <canvas
-              ref={canvasRef}
-              className="bg-white rounded cursor-crosshair border border-gray-200 block"
-              style={{ 
-                touchAction: 'none',
-                width: `${CANVAS_WIDTH}px`,
-                height: `${CANVAS_HEIGHT}px`,
-                maxWidth: '100%',
-                maxHeight: '100%'
-              }}
-            />
-          </div>
-          
-          {/* Status Text */}
-          <div className="flex items-center justify-center mt-4">
-            <p className="text-sm text-gray-500">
-              {isEmpty ? (
-                <span className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
-                  Ready for signature
-                </span>
-              ) : (
-                <span className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  Signature captured
-                </span>
+        <div className="flex-1 p-3 sm:p-6 overflow-hidden">
+          <div className="h-full flex flex-col max-h-full">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-2 sm:p-4 bg-gray-50 flex-1 overflow-hidden">
+              <canvas
+                ref={canvasRef}
+                className="w-full bg-white rounded cursor-crosshair border border-gray-200 block"
+                style={{ 
+                  touchAction: 'none',
+                  height: isMobile ? '180px' : '240px',
+                  maxWidth: '100%'
+                }}
+              />
+            </div>
+            
+            {/* Status Text */}
+            <div className="flex items-center justify-between mt-3 sm:mt-4">
+              <p className="text-xs sm:text-sm text-gray-500">
+                {isEmpty ? (
+                  <span className="flex items-center">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                    Ready for signature
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Signature captured
+                  </span>
+                )}
+              </p>
+              
+              {isMobile && (
+                <p className="text-xs text-gray-400">
+                  Rotate device for larger canvas
+                </p>
               )}
-            </p>
+            </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-          <div className="flex justify-between items-center">
+        <div className="p-3 sm:p-6 border-t border-gray-200 bg-gray-50 sm:bg-white">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-3 sm:space-y-0">
             {/* Clear Button */}
             <button
               onClick={clearSignature}
-              className="flex items-center justify-center px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+              className="flex items-center justify-center px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               disabled={isEmpty}
             >
               <RotateCcw className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -206,16 +223,16 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
             </button>
 
             {/* Primary Actions */}
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={onClose}
-                className="flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-base"
+                className="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base order-2 sm:order-1"
               >
                 Cancel
               </button>
               <button
                 onClick={saveSignature}
-                className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                className="flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base order-1 sm:order-2"
                 disabled={isEmpty}
               >
                 <Check className="h-4 w-4 mr-2 flex-shrink-0" />
