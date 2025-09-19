@@ -105,3 +105,7 @@
 
 </tr>
 </table>
+
+---
+
+<p align="center">Made with ❤️ while learning.</p>
