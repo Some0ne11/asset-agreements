@@ -28,7 +28,7 @@
 <h2 id="layout">📸 Preview</h2>
 
 <p align="center">
-<img src="public/preview.png" alt="upload" width="400px">
+<img src="public/preview.png" alt="upload" width="800px">
 </p>
 
 
